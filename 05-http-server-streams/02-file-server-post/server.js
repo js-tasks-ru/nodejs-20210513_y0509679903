@@ -22,37 +22,41 @@ server.on('request', (req, res) => {
     return resStatus(400).end('Nested folders are not supported');
   }
 
-  if (fs.existsSync(filepath)) {
-    return resStatus(409).end('File already exists');
-  }
-
   try {
     switch (req.method) {
       case 'POST':
-        const writeStream = fs.createWriteStream(filepath);
-        req
-            .pipe(transform)
-            .pipe(writeStream);
+        fs.stat(filepath, (error, stats) => {
+          if (stats && stats.isFile()) {
+            return resStatus(409).end('File already exists');
+          }
 
-        transform.on('error', function(err) {
-          if (err.code === 'LIMIT_EXCEEDED') {
-            fs.unlink(filepath, noop);
-            writeStream.close();
-            return resStatus(413).end('File limit has been exceeded.');
-          } else {
-            if (err) {
-              return resStatus(500).end('Some error occurred.');
-            }
+          if (error) {
+            const writeStream = fs.createWriteStream(filepath);
+            req
+                .pipe(transform)
+                .pipe(writeStream);
+
+            transform.on('error', function(err) {
+              if (err.code === 'LIMIT_EXCEEDED') {
+                fs.unlink(filepath, noop);
+                writeStream.close();
+                return resStatus(413).end('File limit has been exceeded.');
+              } else {
+                if (err) {
+                  return resStatus(500).end('Some error occurred.');
+                }
+              }
+            });
+            req.on('close', () => {
+              if (!writeStream.writableFinished) {
+                fs.unlink(filepath, noop);
+                writeStream.close();
+              }
+            });
+            writeStream.on('finish', () => {
+              return resStatus(201).end('Success');
+            });
           }
-        });
-        req.on('close', () => {
-          if (!writeStream.writableFinished) {
-            fs.unlink(filepath, noop);
-            writeStream.close();
-          }
-        });
-        writeStream.on('finish', () => {
-          return resStatus(201).end('Success');
         });
         break;
 

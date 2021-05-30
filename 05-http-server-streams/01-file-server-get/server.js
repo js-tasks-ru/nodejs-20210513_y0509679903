@@ -17,22 +17,23 @@ server.on('request', (req, res) => {
     return resStatus(400).end('Nested folders are not supported');
   }
 
-  try {
-    const filepath = path.join(__dirname, 'files', pathname);
-    const data = fs.readFileSync(filepath);
-
-    switch (req.method) {
-      case 'GET':
-        return resStatus(200).end(data);
-      default:
-        return resStatus(501).end('Not implemented');
-    }
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      return resStatus(404).end('File not found');
-    } else {
-      return resStatus(500).end('Server error');
-    }
+  switch (req.method) {
+    case 'GET':
+      const filepath = path.join(__dirname, 'files', pathname);
+      const readStream = fs.createReadStream(filepath);
+      readStream.on('open', function() {
+        readStream.pipe(res);
+      });
+      readStream.on('error', (error) => {
+        if (error.code === 'ENOENT') {
+          return resStatus(404).end('File not found');
+        } else {
+          return resStatus(500).end('Server error');
+        }
+      });
+      break;
+    default:
+      return resStatus(501).end('Not implemented');
   }
 });
 
