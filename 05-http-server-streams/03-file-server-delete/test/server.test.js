@@ -7,7 +7,7 @@ const path = require('path');
 const filesFolder = path.resolve(__dirname, '../files');
 const fixturesFolder = path.resolve(__dirname, './fixtures');
 
-describe.skip('http-server-streams/file-server-delete', () => {
+describe('http-server-streams/file-server-delete', () => {
   describe('тесты на файловый сервер', () => {
     before((done) => {
       fse.emptyDirSync(filesFolder);
