@@ -4,7 +4,7 @@ const {execSync} = require('child_process');
 const path = require('path');
 const expect = require('chai').expect;
 
-describe('event-loop/events-order', () => {
+describe.skip('event-loop/events-order', () => {
   describe('Порядок вывода сообщений', () => {
     it('файл с решением должен быть в папке с задачей', () => {
       const isExists = fs.existsSync(path.join(__dirname, '../solution.txt'));
