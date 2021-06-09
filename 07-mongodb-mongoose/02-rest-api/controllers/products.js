@@ -25,12 +25,7 @@ module.exports.productList = async function productList(ctx, next) {
   const {subcategory} = ctx.query;
 
   if (!subcategory) {
-    const products = await Product.aggregate([
-      {$project: {
-      // eslint-disable-next-line max-len
-        _id: 0, id: '$_id', title: 1, description: 1, category: 1, price: 1, subcategory: 1, images: 1,
-      }},
-    ]);
+    const products = await Product.find({});
 
     ctx.body = {products};
   }
@@ -45,19 +40,13 @@ module.exports.productById = async function productById(ctx, next) {
     return;
   }
 
-  const product = await Product.aggregate([
-    // eslint-disable-next-line new-cap
-    {$match: {_id: ObjectID(id)}},
-    {$project: {
-      // eslint-disable-next-line max-len
-      _id: 0, id: '$_id', title: 1, description: 1, category: 1, price: 1, subcategory: 1, images: 1,
-    }},
-  ]);
+  // eslint-disable-next-line new-cap
+  const product = await Product.findOne({_id: id});
 
-  if (!product || !product.length) {
+  if (!product) {
     ctx.throw(404);
     return;
   }
 
-  ctx.body = {product: product[0]};
+  ctx.body = {product};
 };
