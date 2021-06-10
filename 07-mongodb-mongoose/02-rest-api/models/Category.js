@@ -17,4 +17,14 @@ const categorySchema = new mongoose.Schema({
   subcategories: [subCategorySchema],
 });
 
+// Duplicate the ID field.
+subCategorySchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
+
+// Ensure virtual fields are serialised.
+subCategorySchema.set('toJSON', {
+  virtuals: true,
+});
+
 module.exports = connection.model('Category', categorySchema);
