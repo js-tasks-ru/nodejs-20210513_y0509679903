@@ -11,8 +11,7 @@ module.exports = new LocalStrategy(
         return;
       }
 
-      // Код User.checkPassword не работает
-      const passwordVerified = await User.checkPassword(password);
+      const passwordVerified = await user.checkPassword(password);
 
       if (!passwordVerified) {
         done(null, false, 'Неверный пароль');
